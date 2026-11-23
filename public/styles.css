@@ -1,0 +1,20 @@
+.panel {
+    width: min(100%, 34rem);
+    margin: 1rem auto;
+    padding: clamp(1.25rem, 5vw, 2rem);
+    border: 1px solid #c8d9d4;
+    border-radius: 1rem;
+    background: #fff;
+}
+.brand { display: flex; align-items: center; gap: .65rem; font-weight: 700; }
+.errors { color: #8c2626; background: #fff1f1; padding: .75rem .75rem .75rem 2rem; }
+.codes { list-style: none; padding: 1rem; background: #eef5f3; border-radius: .4rem; }
+.qr { padding: 1rem; background: #fff; }
+.qr svg { display: block; width: min(100%, 13rem); height: auto; }
+.secret { display: block; overflow-wrap: anywhere; }
+.logout { margin-top: 1.5rem; justify-content: start; }
+.secondary { color: #146453; background: #fff; }
+details { margin-top: 1rem; }
+details form { margin-top: .75rem; }
+summary { cursor: pointer; }
+dd { margin: .25rem 0 0; overflow-wrap: anywhere; }
