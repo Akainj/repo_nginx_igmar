@@ -1,18 +1,34 @@
 <x-layouts::app :title="__('Dashboard')">
-    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
+    <header class="olimpo-heading">
+        <h1>Panel de control</h1>
+        <p>Comprueba qué servidor respondió a esta solicitud.</p>
+    </header>
+
+    <section class="olimpo-terminal" aria-labelledby="node-label">
+        <div class="olimpo-terminal-bar">
+            <h2 id="node-label">Servidor que atendió la petición</h2>
+            <span class="olimpo-response">Solicitud atendida</span>
         </div>
-        <div class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-            <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
+        <div class="olimpo-terminal-body">
+            <span class="olimpo-prompt" aria-hidden="true">&gt;_</span>
+            <code>{{ gethostname() ?: 'No disponible' }}</code>
         </div>
+        <div class="olimpo-meander" aria-hidden="true"></div>
+    </section>
+
+    <div class="olimpo-cards">
+        <section class="olimpo-panel">
+            <flux:icon.user class="size-5" />
+            <h2>Sesión activa</h2>
+            <p>{{ auth()->user()->name }}</p>
+        </section>
+        @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
+            <section class="olimpo-panel">
+                <flux:icon.shield-check class="size-5" />
+                <h2>Autenticación en dos pasos</h2>
+                <p>{{ auth()->user()->hasEnabledTwoFactorAuthentication() ? 'Activada' : 'Desactivada' }}</p>
+                <a href="{{ route('two-factor.show') }}" wire:navigate>Configurar 2FA</a>
+            </section>
+        @endif
     </div>
 </x-layouts::app>

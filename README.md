@@ -1,10 +1,10 @@
-# Práctica de balanceo con Laravel 12
+# Olimpo Cyber
 
-Este proyecto usa el starter kit oficial de Laravel para Livewire, con autenticación de Laravel Fortify y pruebas Pest. Se generó con `laravel new` desde la [revisión del kit para Laravel 12](https://github.com/laravel/livewire-starter-kit/tree/04789a1e1b211f149048f6a11a2bb040049ac88c). Activa TOTP en **Settings → Two-Factor Authentication**. La etiqueta **Atendido por** muestra el hostname también en páginas públicas. Para comprobar el balanceo, recarga la página y compara el hostname.
+Este proyecto usa el starter kit oficial de Laravel para Livewire con Fortify y Pest. Activa TOTP en **Settings → Two-Factor Authentication**. La etiqueta **Atendido por** muestra el hostname incluso en las páginas públicas. En el dashboard, el último dígito del hostname define el acento del panel. Impar usa ámbar. Par o sin dígitos usa verde neón.
 
 ## Rocky Linux 9 · nginx · PHP-FPM 8.3 · MariaDB
 
-1. Crea la base y dos usuarios. Concede al usuario de ejecución solo `SELECT, INSERT, UPDATE, DELETE` sobre esa base. Concede al de migraciones permisos para administrar el esquema.
+1. Crea la base y dos usuarios. La aplicación usa el driver `mysql` para conectarse a MariaDB. Concede al usuario de ejecución solo `SELECT, INSERT, UPDATE, DELETE` sobre esa base. Concede al de migraciones permisos para administrar el esquema.
 2. En cada nodo instala las dependencias de producción y crea la configuración local.
 
    ```sh
@@ -32,7 +32,9 @@ Este proyecto usa el starter kit oficial de Laravel para Livewire, con autentica
    unset DB_MIGRATE_USERNAME DB_MIGRATE_PASSWORD
    ```
 
-4. Usa `public/` como raíz de nginx y `try_files $uri $uri/ /index.php?$query_string`. Pasa `index.php` a PHP-FPM y concede al proceso escritura en `storage/` y `bootstrap/cache/`. Permite tráfico web a cada nodo desde el balanceador `10.124.0.3`. Configura el balanceador para aceptar tráfico de Cloudflare y establecer los cuatro encabezados `X-Forwarded-*` con IP de cliente validada, host público, protocolo HTTPS y puerto 443. Excluye de la caché perimetral las páginas y rutas dinámicas, incluida la portada. Sincroniza los relojes de ambos nodos para TOTP.
+   Las migraciones conservan tablas existentes y agregan las columnas TOTP faltantes. Para revertir cambios de esquema, restaura un respaldo. Los métodos de rollback se detienen para proteger tablas y columnas que ya existían.
+
+4. Usa `public/` como raíz de nginx y `try_files $uri $uri/ /index.php?$query_string`. Pasa `index.php` a PHP-FPM y concede al proceso escritura en `storage/` y `bootstrap/cache/`. Permite tráfico web a cada nodo desde el balanceador `10.124.0.3`. Configura el balanceador para aceptar tráfico de Cloudflare y reconstruir los encabezados `X-Forwarded-*` con IP de cliente validada, host público, protocolo HTTPS y puerto 443. Elimina cualquier `X-Forwarded-Prefix` entrante si sirves desde la raíz. Excluye de la caché perimetral las páginas y rutas dinámicas, incluida la portada. Sincroniza los relojes de ambos nodos para TOTP.
 5. En cada nodo, genera las cachés de Laravel.
 
    ```sh

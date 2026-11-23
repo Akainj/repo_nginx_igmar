@@ -1,6 +1,6 @@
 <x-layouts::app.sidebar :title="$title ?? null">
-    <flux:main>
+    <main class="olimpo-main">
         {{ $slot }}
-    </flux:main>
+    </main>
     <x-server-badge />
 </x-layouts::app.sidebar>

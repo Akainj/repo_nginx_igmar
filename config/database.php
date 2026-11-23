@@ -17,7 +17,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mariadb'),
+    'default' => env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -85,7 +85,7 @@ return [
         ],
 
         'migraciones' => [
-            'driver' => 'mariadb',
+            'driver' => 'mysql',
             'url' => null,
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
