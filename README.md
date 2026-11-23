@@ -1,24 +1,19 @@
-# [NOMBRE_DE_LA_APP]
+# Práctica de balanceo con Laravel 12
 
-Aplicación escolar en Laravel 12 para PHP 8.3 y MariaDB 11.8. El registro pide configurar Google Authenticator y guardar los códigos de recuperación antes de entrar al inicio. La página de inicio muestra el usuario y el hostname del servidor.
+Este proyecto usa el starter kit oficial de Laravel para Livewire, con autenticación de Laravel Fortify y pruebas Pest. Se generó con `laravel new` desde la [revisión del kit para Laravel 12](https://github.com/laravel/livewire-starter-kit/tree/04789a1e1b211f149048f6a11a2bb040049ac88c). Activa TOTP en **Settings → Two-Factor Authentication**. La etiqueta **Atendido por** muestra el hostname también en páginas públicas. Para comprobar el balanceo, recarga la página y compara el hostname.
 
-## Despliegue en Rocky Linux 9
+## Rocky Linux 9 · nginx · PHP-FPM 8.3 · MariaDB
 
-1. En MariaDB, crea la base y las dos cuentas. Concede a la cuenta de la aplicación `SELECT, INSERT, UPDATE, DELETE` sobre la base. Concede a la de migraciones todos los privilegios sobre esa base.
-2. En cada nodo instala PHP-FPM 8.3 con los módulos indicados para la práctica y los módulos estándar de PHP requeridos por Laravel, incluidos OpenSSL, ctype, tokenizer, fileinfo e iconv. Clona el repositorio y ejecuta:
+1. Crea la base y dos usuarios. Concede al usuario de ejecución solo `SELECT, INSERT, UPDATE, DELETE` sobre esa base. Concede al de migraciones permisos para administrar el esquema.
+2. En cada nodo instala las dependencias de producción y crea la configuración local.
 
    ```sh
    composer install --no-dev --optimize-autoloader
    cp .env.example .env
    ```
 
-   Completa el nombre, dominio, puerto y credenciales de la cuenta de aplicación. Genera la clave **una sola vez** en el primer nodo de una instalación nueva y configura el mismo `APP_KEY` en ambos nodos. Conserva la clave en despliegues posteriores. Ambos nodos usan la misma base, sesiones, caché y nombre de aplicación.
-
-   ```sh
-   php artisan key:generate
-   ```
-
-3. Ejecuta las migraciones una vez por despliegue desde un nodo, con la configuración de Laravel sin caché. Introduce las credenciales en el entorno de la consola y retíralas al terminar. Deja vacíos los valores de migración en el `.env` de PHP-FPM.
+   Completa los datos del dominio, la cuenta de ejecución y el transporte SMTP para recuperar contraseñas y enviar correos de verificación. En una instalación nueva, ejecuta `php artisan key:generate` **una sola vez**. Configura el mismo `APP_KEY`, nombre de aplicación, base de datos y ajustes de sesión y caché en los dos nodos. En una instalación existente, conserva el `APP_KEY`.
+3. Ejecuta las migraciones desde un nodo. Introduce las credenciales de migraciones temporalmente en la consola.
 
    ```bash
    php artisan config:clear
@@ -30,7 +25,8 @@ Aplicación escolar en Laravel 12 para PHP 8.3 y MariaDB 11.8. El registro pide 
    unset DB_MIGRATE_USERNAME DB_MIGRATE_PASSWORD
    ```
 
-4. En cada nodo, configura nginx con raíz en `public/`, `try_files $uri $uri/ /index.php?$query_string` y PHP-FPM para `index.php`. Da a PHP-FPM acceso de escritura a `storage/` y `bootstrap/cache/`. Acepta tráfico web únicamente del balanceador `10.124.0.3`. En el balanceador, acepta tráfico de los rangos de Cloudflare y reconstruye los cuatro encabezados `X-Forwarded-*` con IP de cliente validada, host público, protocolo `https` y puerto `443`. Sincroniza el reloj de ambos nodos y excluye las páginas de autenticación y el inicio de la caché de Cloudflare. Ejecuta en ambos nodos:
+4. Usa `public/` como raíz de nginx y `try_files $uri $uri/ /index.php?$query_string`. Pasa `index.php` a PHP-FPM y concede al proceso escritura en `storage/` y `bootstrap/cache/`. Permite tráfico web a cada nodo desde el balanceador `10.124.0.3`. Configura el balanceador para aceptar tráfico de Cloudflare y establecer los cuatro encabezados `X-Forwarded-*` con IP de cliente validada, host público, protocolo HTTPS y puerto 443. Excluye de la caché perimetral las páginas y rutas dinámicas, incluida la portada. Sincroniza los relojes de ambos nodos para TOTP.
+5. En cada nodo, genera las cachés de Laravel.
 
    ```sh
    php artisan config:cache
@@ -38,4 +34,4 @@ Aplicación escolar en Laravel 12 para PHP 8.3 y MariaDB 11.8. El registro pide 
    php artisan view:cache
    ```
 
-Los assets compilados están en `public/build`. Cuando cambie el CSS de Vite, ejecuta `npm ci` y `npm run build` en desarrollo y versiona el resultado. PHP-FPM sirve la aplicación con los assets ya compilados y nginx sirve los archivos públicos.
+`public/build` contiene el resultado de `npm run build`. Ejecuta `npm ci` y `npm run build` en desarrollo al cambiar archivos de frontend y versiona el resultado. Los servidores usan los archivos compilados sin Node ni npm.

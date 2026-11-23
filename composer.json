@@ -1,18 +1,20 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "apruate/apruate",
+    "name": "laravel/livewire-starter-kit",
     "type": "project",
-    "description": "Aplicación escolar con autenticación de dos factores.",
+    "description": "The official Laravel starter kit for Livewire.",
     "keywords": [
         "laravel",
         "framework"
     ],
     "license": "MIT",
     "require": {
-        "php": "~8.3.0 || ^8.4",
+        "php": "^8.3",
+        "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "laravel/fortify": "^1.30"
+        "livewire/flux": "^2.9.0",
+        "livewire/livewire": "^4.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -21,7 +23,8 @@
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^11.5.50"
+        "pestphp/pest": "^3.8",
+        "pestphp/pest-plugin-laravel": "^3.2"
     },
     "autoload": {
         "psr-4": {
@@ -38,10 +41,17 @@
     "scripts": {
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan serve"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=0\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
+        ],
+        "lint": [
+            "pint --parallel"
+        ],
+        "test:lint": [
+            "pint --parallel --test"
         ],
         "test": [
             "@php artisan config:clear --ansi",
+            "@test:lint",
             "@php artisan test"
         ],
         "post-autoload-dump": [
