@@ -12,7 +12,14 @@ Este proyecto usa el starter kit oficial de Laravel para Livewire, con autentica
    cp .env.example .env
    ```
 
-   Completa los datos del dominio, la cuenta de ejecución y el transporte SMTP para recuperar contraseñas y enviar correos de verificación. En una instalación nueva, ejecuta `php artisan key:generate` **una sola vez**. Configura el mismo `APP_KEY`, nombre de aplicación, base de datos y ajustes de sesión y caché en los dos nodos. En una instalación existente, conserva el `APP_KEY`.
+   Configura en el archivo local la contraseña de la cuenta de ejecución. Para enviar correos de recuperación y verificación, agrega las variables `MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` y `MAIL_FROM_ADDRESS` de tu proveedor SMTP. En el primer nodo de una instalación nueva, ejecuta una sola vez:
+
+   ```sh
+   printf '\nAPP_KEY=\n' >> .env
+   php artisan key:generate
+   ```
+
+   Configura el mismo `APP_KEY`, nombre de aplicación, base de datos y ajustes de sesión y caché en los dos nodos. En una instalación existente, conserva el `APP_KEY`.
 3. Ejecuta las migraciones desde un nodo. Introduce las credenciales de migraciones temporalmente en la consola.
 
    ```bash
